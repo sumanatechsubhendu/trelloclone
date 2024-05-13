@@ -95,17 +95,41 @@ class LoginController extends Controller
         return response()->json(['message' => 'Successfully logged out'], 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/verify-token",
+     *     operationId="verifyToken",
+     *     tags={"verifyToken"},
+     *     summary="Verify Token",
+     *     description="Verify the validity of the provided authentication token",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token is valid",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="valid", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Token is valid"),
+     *             @OA\Property(property="responseData", type="object",
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="email", type="string", example="user@example.com"),
+     *                 @OA\Property(property="token_type", type="string", example="Bearer"),
+     *                 @OA\Property(property="expires_at", type="string", format="date-time", example="2024-05-10 12:00:00"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-05-10 10:00:00")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="valid", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     )
+     * )
+     */
     public function verifyToken(Request $request)
     {
-        // Validate the request data
-        $validator = Validator::make($request->all(), [
-            'token' => 'required|string',
-        ]);
-
-        // If validation fails, return validation error response
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
-        }
         // Check if the request has a valid token
         if (Auth::guard('api')->check()) {
             // Retrieve the authenticated user
@@ -128,10 +152,11 @@ class LoginController extends Controller
                 'valid' => true,
                 'message' => 'Token is valid',
                 'responseData' => $responseData
-        ], 200);
+            ], 200);
         } else {
             // Token is invalid or missing, return error response
             return response()->json(['valid' => false, 'message' => 'Unauthorized'], 401);
         }
     }
+
 }
