@@ -2464,6 +2464,155 @@
                 ]
             }
         },
+        "/api/list-workspaces": {
+            "get": {
+                "tags": [
+                    "UserDashboard"
+                ],
+                "summary": "List workspaces",
+                "description": "Returns the list of workspaces for the authenticated user.",
+                "operationId": "listWorkspaces",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "workspaces": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/list-boards": {
+            "get": {
+                "tags": [
+                    "UserDashboard"
+                ],
+                "summary": "List boards",
+                "description": "Returns the list of boards for the authenticated user's workspaces.",
+                "operationId": "listBoards",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "boards": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Board"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No boards found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No boards found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/workspace-details/{id}": {
+            "get": {
+                "tags": [
+                    "UserDashboard"
+                ],
+                "summary": "Get workspace details by ID",
+                "description": "Returns the details of a workspace identified by the provided ID",
+                "operationId": "getWorkspaceDetailsById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the workspace to fetch",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Workspace"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Workspace not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Workspace not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/workspaces": {
             "get": {
                 "tags": [

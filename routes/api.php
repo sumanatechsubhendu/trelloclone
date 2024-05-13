@@ -43,6 +43,6 @@ Route::middleware('auth:api')->group( function () {
     Route::resource('boardSections', BoardSectionController::class);
 
     Route::get('list-workspaces', [UserDashboardController::class, 'listWorkspaces']);
-    Route::get('workspace-details', [UserDashboardController::class, 'workspaceDetails']);
+    Route::get('workspace-details/{id}', [UserDashboardController::class, 'workspaceDetails']);
     Route::get('list-boards', [UserDashboardController::class, 'listBoards']);
 });
