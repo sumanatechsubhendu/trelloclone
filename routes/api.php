@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BoardsController;
 use App\Http\Controllers\BoardSectionController;
@@ -29,10 +29,12 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('register', [RegisterController::class, 'register']);
-Route::post('login', [LoginController::class, 'login']);
+Route::post('login', [AuthController::class, 'login']);
+Route::post('forget-password', [AuthController::class, 'forgetPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:api')->group( function () {
-    Route::post('logout', [LoginController::class, 'logout']);
-    Route::post('verify-token', [LoginController::class, 'verifyToken']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('verify-token', [AuthController::class, 'verifyToken']);
     Route::resource('users', UserController::class);
     Route::resource('teams', TeamController::class);
     Route::resource('team-members', TeamMemberController::class);
