@@ -244,7 +244,7 @@ class WorkspaceController extends Controller
          } catch (ModelNotFoundException $e) {
              return response()->json([
                  'success' => false,
-                 'message' => 'Team not found'
+                 'message' => 'Workspace not found'
              ], JsonResponse::HTTP_NOT_FOUND);
          }
      }

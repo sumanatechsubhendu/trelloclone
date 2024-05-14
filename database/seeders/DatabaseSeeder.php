@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersTableSeeder::class,
             TeamsTableSeeder::class,
-            WorkspacesTableSeeder::class,
             SectionsTableSeeder::class,
+            WorkspacesTableSeeder::class,
         ]);
     }
 }

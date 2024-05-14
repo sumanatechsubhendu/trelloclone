@@ -16,6 +16,14 @@ class BoardSection extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['section_title'];
+
+
+    /**
      * Get the board that owns the board section.
      */
     public function board()
@@ -37,6 +45,11 @@ class BoardSection extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function getSectionTitleAttribute()
+    {
+        return $this->section->title;
     }
 }
 
