@@ -14,7 +14,7 @@ class AddColumnsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'user'])->default('user')->after('password');
+            $table->enum('role', ['admin', 'member'])->default('member')->after('password');
             $table->unsignedBigInteger('created_by')->nullable()->after('remember_token');
             $table->boolean('status')->default(true)->comment('1 for active, 0 for inactive')->after('remember_token');
             $table->foreign('created_by')->references('id')->on('users');

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateWorkspaceRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\TeamResource;
+use App\Models\Board;
+use App\Models\BoardSection;
+use App\Models\Section;
 use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -170,14 +173,33 @@ class WorkspaceController extends Controller
      public function store(UpdateWorkspaceRequest $request, Workspace $workspace)
      {
         $request->setTeam($workspace);
-         // Set the created_by attribute
-         $data = $request->validated();
-         $data['created_by'] = Auth::user()->id;
-         // Create the Team
-         $team = Workspace::create($data);
+        // Set the created_by attribute
+        $data = $request->validated();
+        $data['created_by'] = Auth::user()->id;
+        // Create the Team
+        $workspaceObj = Workspace::create($data);
 
-         // Return the newly created team resource
-         return new WorkspaceResource($team);
+        $boardData['name'] = 'General Tasks';
+        $boardData['workspace_id'] = $workspaceObj->id;
+        $boardData['created_by'] = Auth::user()->id;
+        // Create the Team
+        $board = Board::create($boardData);
+
+        $sections = Section::where('type', 0)->orderBy('position', 'asc')->get();
+        $boardSections = [];
+        foreach ($sections as $key => $val) {
+            $boardSections[] = [
+                'board_id' => $board->id,
+                'section_id' => $val->id,
+                'position' => $key + 1,
+                'created_by' => Auth::user()->id,
+                'created_at' => now(), // Add created_at timestamp
+                'updated_at' => now(), // Add updated_at timestamp
+            ];
+        }
+        // Now, you can insert the board sections
+        BoardSection::insert($boardSections);
+        return new WorkspaceResource($workspaceObj);
      }
 
      /**

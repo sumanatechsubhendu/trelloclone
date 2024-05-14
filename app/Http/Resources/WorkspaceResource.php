@@ -12,8 +12,15 @@ class WorkspaceResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'name' => $this->name,
+            'created_by' => $this->created_by,
+            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at,
+            'id' => $this->id,
+            'boards' => BoardResource::collection($this->boards), // Assuming BoardResource is another resource class
+        ];
     }
 }

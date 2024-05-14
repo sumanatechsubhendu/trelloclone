@@ -22,6 +22,11 @@ class Board extends Model
         return $this->belongsTo(User::class, 'admin_id');
     }
 
+    public function sections()
+    {
+        return $this->hasMany(BoardSection::class, 'board_id'); // Specify the foreign key column name
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');

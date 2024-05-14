@@ -23,4 +23,9 @@ class Workspace extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function boards()
+    {
+        return $this->hasMany(Board::class, 'workspace_id'); // Specify the foreign key column name
+    }
 }
