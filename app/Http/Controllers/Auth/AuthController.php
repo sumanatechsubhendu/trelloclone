@@ -166,8 +166,12 @@ class AuthController extends Controller
             // Prepare the response data
             $responseData = [
                 'user_id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
                 'token_type' => 'Bearer',
+                'status' => $user->status,
+                'created_by' => $user->created_by,
                 'expires_at' => $accessToken->expires_at,
                 'created_at' => $accessToken->created_at,
             ];
