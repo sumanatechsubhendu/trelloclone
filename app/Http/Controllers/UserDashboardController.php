@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BoardResource;
+use App\Http\Resources\WorkspaceMemberResource;
+use App\Http\Resources\WorkspaceResource;
 use App\Models\Board;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Models\WorkspaceMember;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -32,19 +36,14 @@ class UserDashboardController extends Controller
     public function listWorkspaces(Request $request)
     {
         // Retrieve the logged-in user's workspaces using WorkspaceMember model
-        $workspaces = WorkspaceMember::where("user_id", Auth::user()->id)
+        $workspaces = WorkspaceMember::when(Auth::user()->role !== 'admin', function ($query) {
+            $query->where('user_id', Auth::user()->id);
+        })
         ->with('workspace:id,name')
         ->paginate();
-
         // Transform the workspaces data to match the desired JSON response structure
         $workspacesData = $workspaces->map(function ($workspace) {
-            return [
-                'id' => $workspace->id,
-                'workspace_id' => $workspace->workspace->id,
-                'user_id' => $workspace->user_id,
-                'name' => $workspace->workspace->name,
-                'created_at' => $workspace->created_at,
-            ];
+            return new WorkspaceMemberResource($workspace);
         });
 
         // Create a paginator manually to include pagination metadata in the response
@@ -89,23 +88,41 @@ class UserDashboardController extends Controller
     public function listBoards(Request $request)
     {
         // Retrieve the logged-in user's workspaces using WorkspaceMember model
-        $workspaces = WorkspaceMember::where("user_id", Auth::user()->id)
-            ->get();
+        $workspaces = WorkspaceMember::when(Auth::user()->role !== 'admin', function ($query) {
+            $query->where('user_id', Auth::user()->id);
+        })
+        ->pluck('workspace_id') // Pluck workspace IDs directly
+        ->all(); // Convert the collection to an array
 
-        $allowed_workspace = [];
-        foreach ($workspaces as $key=>$val) {
-            $allowed_workspace[] = $val->workspace_id;
+        if (empty($workspaces)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No boards found'
+            ], 404);
         }
 
-        if($allowed_workspace) {
+        if($workspaces) {
             // Retrieve boards where workspace_id is in the allowed workspaces and paginate the results
-            $boards = Board::whereIn('workspace_id', $allowed_workspace)->paginate();
+            if (Auth::user()->role == 'admin') {
+                $boards = Board::paginate();
+            } else {
+                $boards = Board::whereIn('workspace_id', $workspaces)->paginate();
+            }
+            $boardData = $boards->map(function ($board) {
+                return new BoardResource($board);
+            });
 
-            // Return the paginated list of boards as JSON response
-            return response()->json([
-                'success' => true,
-                'boards' => $boards
-            ], 200);
+            // Create a paginator manually to include pagination metadata in the response
+            $paginator = new LengthAwarePaginator(
+                $boardData,
+                $boards->total(),
+                $boards->perPage(),
+                $boards->currentPage(),
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            // Return the paginated list of workspaces as JSON response
+            return response()->json(['workspaces' => $paginator], 200);
         } else {
             return response()->json([
                 'success' => false,
@@ -148,29 +165,38 @@ class UserDashboardController extends Controller
     public function workspaceDetails($id)
     {
         try {
-            // Retrieve the logged-in user's workspaces using WorkspaceMember model
-            $workspaces = WorkspaceMember::where("user_id", Auth::user()->id)
+            if (Auth::user()->role !== 'admin') {
+                // Retrieve the logged-in user's workspaces using WorkspaceMember model
+                $workspaces = WorkspaceMember::when(Auth::user()->role !== 'admin', function ($query) {
+                    $query->where('user_id', Auth::user()->id);
+                })
                 ->where("workspace_id", $id)
                 ->with('workspace:id,name', 'boards')
                 ->firstOrFail(); // Use firstOrFail() to automatically throw ModelNotFoundException if not found
+            } else {
+                try {
+                    $team = Workspace::findOrFail($id);
+                    return response()->json([
+                        'success' => true,
+                        'data' => new WorkspaceResource($team)
+                    ]);
+                } catch (ModelNotFoundException $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Workspace not found'
+                    ], JsonResponse::HTTP_NOT_FOUND);
+                }
+            }
 
-            // Transform the workspaces data to match the desired JSON response structure
-            $workspacesData = [
-                'id' => $workspaces->id,
-                'workspace_id' => $workspaces->workspace_id,
-                'user_id' => $workspaces->user_id,
-                'name' => $workspaces->workspace->name,
-                'created_at' => $workspaces->created_at,
-                'boards' => $workspaces->boards,
-            ];
+            $team = Workspace::findOrFail($id);
             return response()->json([
                 'success' => true,
-                'data' => $workspacesData
+                'data' => new WorkspaceResource($workspaces->team)
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Workspace not found'
+                'message' => 'Workspace not found or you have no access'
             ], JsonResponse::HTTP_NOT_FOUND);
         }
     }

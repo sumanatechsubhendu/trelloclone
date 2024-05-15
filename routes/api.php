@@ -35,15 +35,16 @@ Route::post('reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:api')->group( function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify-token', [AuthController::class, 'verifyToken']);
-    Route::resource('users', UserController::class);
-    Route::resource('teams', TeamController::class);
-    Route::resource('team-members', TeamMemberController::class);
-    Route::resource('workspaces', WorkspaceController::class);
-    Route::resource('workspaceMembers', WorkspaceMemberController::class);
-    Route::resource('boards', BoardsController::class);
-    Route::resource('sections', SectionController::class);
-    Route::resource('boardSections', BoardSectionController::class);
-
+    Route::middleware(['admin'])->group(function () {
+        Route::resource('users', UserController::class);
+        Route::resource('teams', TeamController::class);
+        Route::resource('team-members', TeamMemberController::class);
+        Route::resource('workspaces', WorkspaceController::class);
+        Route::resource('workspaceMembers', WorkspaceMemberController::class);
+        Route::resource('boards', BoardsController::class);
+        Route::resource('sections', SectionController::class);
+        Route::resource('boardSections', BoardSectionController::class);
+    });
     Route::get('list-workspaces', [UserDashboardController::class, 'listWorkspaces']);
     Route::get('workspace-details/{id}', [UserDashboardController::class, 'workspaceDetails']);
     Route::get('list-boards', [UserDashboardController::class, 'listBoards']);

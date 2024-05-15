@@ -12,8 +12,14 @@ class WorkspaceMemberResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'workspace_id' => $this->workspace_id,
+            'user_id' => $this->user_id,
+            'created_at' => $this->created_at,
+            'workspace' => new WorkspaceResource($this->workspace), // Assuming WorkspaceResource is another resource class
+        ];
     }
 }
