@@ -9,6 +9,7 @@ use App\Models\Board;
 use App\Models\BoardSection;
 use App\Models\Section;
 use App\Models\Workspace;
+use App\Models\WorkspaceMember;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -57,38 +58,12 @@ use Illuminate\Support\Facades\Auth;
 class WorkspaceController extends Controller
 {
     /**
-     * Get a list of workspaces.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
      * @OA\Get(
      *     path="/api/workspaces",
      *     summary="Get a list of workspaces",
      *     tags={"Workspaces"},
-     *     description="Retrieves a list of workspaces with pagination support.",
+     *     description="Retrieves a list of workspaces.",
      *     operationId="getWorkspaceList",
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number (default is 1)",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             format="int32",
-     *         ),
-     *     ),
-     *     @OA\Parameter(
-     *         name="pageSize",
-     *         in="query",
-     *         description="Number of workspaces per page (default is 10)",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             format="int32",
-     *         ),
-     *     ),
      *     security={{"bearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
@@ -99,27 +74,47 @@ class WorkspaceController extends Controller
      *         ),
      *     ),
      *     @OA\Response(
-     *         response=400,
-     *         description="Bad request, invalid parameters",
+     *         response=401,
+     *         description="Unauthorized: Authentication failed or user lacks necessary permissions.",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Validation failed"),
-     *             @OA\Property(property="errors", type="object", example={"name": {"The name field is required."}, "email": {"The email field is required."}}),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No workspace found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No workspace found"),
      *         ),
      *     ),
      * )
      */
     public function index(Request $request)
     {
-        // Set default page size if not provided in the request
-        $pageSize = $request->input('pageSize', 10);
+        $user = Auth::user();
 
-        // Get page number from the request
-        $pageNumber = $request->input('page', 1);
+        // If the user is an admin, retrieve all workspaces
+        if ($user->role == 'admin') {
+            $workspaces = Workspace::get();
+        } else {
+            // Retrieve the logged-in user's workspace IDs using WorkspaceMember model
+            $workspaceIds = WorkspaceMember::where('user_id', $user->id)->pluck('workspace_id')->all();
 
-        // Fetch workspaces with pagination
-        $workspaces = Workspace::paginate($pageSize, ['*'], 'page', $pageNumber);
+            if (empty($workspaceIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No workspace found'
+                ], 404);
+            }
 
-        return WorkspaceResource::collection($workspaces);
+            // Retrieve workspaces for the user
+            $workspaces = Workspace::whereIn('id', $workspaceIds)->get();
+        }
+        return response()->json([
+            'success' => true,
+            'data' => WorkspaceResource::collection($workspaces)
+        ]);
     }
 
      /**

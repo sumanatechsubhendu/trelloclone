@@ -3008,30 +3008,8 @@
                     "Workspaces"
                 ],
                 "summary": "Get a list of workspaces",
-                "description": "Retrieves a list of workspaces with pagination support.",
+                "description": "Retrieves a list of workspaces.",
                 "operationId": "getWorkspaceList",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number (default is 1)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32"
-                        }
-                    },
-                    {
-                        "name": "pageSize",
-                        "in": "query",
-                        "description": "Number of workspaces per page (default is 10)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "A list of workspaces",
@@ -3046,26 +3024,35 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad request, invalid parameters",
+                    "401": {
+                        "description": "Unauthorized: Authentication failed or user lacks necessary permissions.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Validation failed"
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No workspace found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "name": [
-                                                    "The name field is required."
-                                                ],
-                                                "email": [
-                                                    "The email field is required."
-                                                ]
-                                            }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No workspace found"
                                         }
                                     },
                                     "type": "object"

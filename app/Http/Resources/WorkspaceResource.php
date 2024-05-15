@@ -15,13 +15,11 @@ class WorkspaceResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'name' => $this->name,
-            'workspace_image' => $this->workspace_image,
             'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
-            'id' => $this->id,
-            'boards' => BoardResource::collection($this->boards), // Assuming BoardResource is another resource class
         ];
     }
 }
