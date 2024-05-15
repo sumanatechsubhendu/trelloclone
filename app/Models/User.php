@@ -38,6 +38,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['profile_image'];
+
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -46,4 +54,20 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function image()
+    {
+        return $this->morphOne(Image::class, 'imageable');
+    }
+
+    public function getProfileImageAttribute()
+    {
+        if ($this->image) {
+            return asset('storage/' . $this->image->image_path);
+        }
+
+        // If there is no associated image, return a default placeholder image or null
+        // Example: return asset('storage/default-placeholder.jpg');
+        return null;
+    }
 }

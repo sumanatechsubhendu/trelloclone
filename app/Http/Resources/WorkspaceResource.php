@@ -16,6 +16,7 @@ class WorkspaceResource extends JsonResource
     {
         return [
             'name' => $this->name,
+            'workspace_image' => $this->workspace_image,
             'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BoardsController;
 use App\Http\Controllers\BoardSectionController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMemberController;
@@ -48,4 +49,6 @@ Route::middleware('auth:api')->group( function () {
     Route::get('list-workspaces', [UserDashboardController::class, 'listWorkspaces']);
     Route::get('workspace-details/{id}', [UserDashboardController::class, 'workspaceDetails']);
     Route::get('list-boards', [UserDashboardController::class, 'listBoards']);
+    Route::post('/users/{user}/profile-image', [ImageController::class, 'storeProfileImage']);
+    Route::post('/workspaces/{workspace}/workspace-image', [ImageController::class, 'storeWorkspaceImage']);
 });

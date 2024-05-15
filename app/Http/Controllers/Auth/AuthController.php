@@ -170,6 +170,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'token_type' => 'Bearer',
+                'image' => $user->profile_image,
                 'status' => $user->status,
                 'created_by' => $user->created_by,
                 'expires_at' => $accessToken->expires_at,
