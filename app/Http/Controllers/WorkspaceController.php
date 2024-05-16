@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateWorkspaceRequest;
+use App\Http\Resources\BoardResource;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\TeamResource;
+use App\Http\Resources\WorkspaceResourceWithBoards;
 use App\Models\Board;
 use App\Models\BoardSection;
 use App\Models\Section;
@@ -230,18 +232,39 @@ class WorkspaceController extends Controller
 
      public function show($id)
      {
-         try {
-             $team = Workspace::findOrFail($id);
-             return response()->json([
-                 'success' => true,
-                 'data' => new WorkspaceResource($team)
-             ]);
-         } catch (ModelNotFoundException $e) {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Workspace not found'
-             ], JsonResponse::HTTP_NOT_FOUND);
-         }
+        $user = Auth::user();
+
+        // If the user is an admin, retrieve all workspaces
+        if ($user->role == 'admin') {
+            try {
+                $team = Workspace::findOrFail($id);
+                return response()->json([
+                    'success' => true,
+                    'data' => new WorkspaceResourceWithBoards($team)
+                ]);
+            } catch (ModelNotFoundException $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Workspace not found'
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+        } else {
+            $workspaceIds = WorkspaceMember::where('user_id', $user->id)
+            ->where("workspace_id", $id)->pluck('workspace_id')->all();
+            if (empty($workspaceIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No workspace found or there is no access.'
+                ], 404);
+            }
+
+            // Retrieve workspaces for the user
+            $workspaces = Workspace::whereIn('id', $workspaceIds)->first();
+        }
+        return response()->json([
+            'success' => true,
+            'data' => new WorkspaceResourceWithBoards($workspaces)
+        ]);
      }
 
      /**

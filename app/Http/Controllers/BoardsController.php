@@ -6,6 +6,8 @@ use App\Http\Requests\BoardRequest;
 use App\Http\Resources\BoardResource;
 use App\Http\Resources\TeamResource;
 use App\Models\Board;
+use App\Models\BoardSection;
+use App\Models\Section;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -181,10 +183,24 @@ class BoardsController extends Controller
         $data = $request->validated();
         $data['created_by'] = Auth::user()->id;
         // Create the Team
-        $team = Board::create($data);
+        $board = Board::create($data);
+        $sections = Section::where('type', 0)->orderBy('position', 'asc')->get();
+        $boardSections = [];
+        foreach ($sections as $key => $val) {
+            $boardSections[] = [
+                'board_id' => $board->id,
+                'section_id' => $val->id,
+                'position' => $key + 1,
+                'created_by' => Auth::user()->id,
+                'created_at' => now(), // Add created_at timestamp
+                'updated_at' => now(), // Add updated_at timestamp
+            ];
+        }
+        // Now, you can insert the board sections
+        BoardSection::insert($boardSections);
 
         // Return the newly created team resource
-        return new BoardResource($team);
+        return new BoardResource($board);
     }
 
 
