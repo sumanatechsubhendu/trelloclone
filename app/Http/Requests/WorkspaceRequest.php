@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-class UpdateWorkspaceRequest extends FormRequest
+class WorkspaceRequest extends FormRequest
 {
     private $workspace;
 
@@ -33,6 +33,7 @@ class UpdateWorkspaceRequest extends FormRequest
     {
         return [
             'name' => 'required|unique:workspaces,name,'.($this->workspace ? $this->workspace->id.',id' : ''),
+            'bg_color' => 'required|regex:/^#[a-fA-F0-9]{6}$/'
         ];
     }
 

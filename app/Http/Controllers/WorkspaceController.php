@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateWorkspaceRequest;
+use App\Http\Requests\WorkspaceRequest;
 use App\Http\Resources\BoardResource;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\TeamResource;
@@ -167,7 +167,7 @@ class WorkspaceController extends Controller
      */
 
 
-     public function store(UpdateWorkspaceRequest $request, Workspace $workspace)
+     public function store(WorkspaceRequest $request, Workspace $workspace)
      {
         $request->setTeam($workspace);
         // Set the created_by attribute
@@ -177,6 +177,7 @@ class WorkspaceController extends Controller
         $workspaceObj = Workspace::create($data);
 
         $boardData['name'] = 'General Tasks';
+        $boardData['bg_color'] = $request->bg_color;
         $boardData['workspace_id'] = $workspaceObj->id;
         $boardData['created_by'] = Auth::user()->id;
         // Create the Team
@@ -237,11 +238,7 @@ class WorkspaceController extends Controller
         // If the user is an admin, retrieve all workspaces
         if ($user->role == 'admin') {
             try {
-                $team = Workspace::findOrFail($id);
-                return response()->json([
-                    'success' => true,
-                    'data' => new WorkspaceResourceWithBoards($team)
-                ]);
+                $workspaces = Workspace::findOrFail($id);
             } catch (ModelNotFoundException $e) {
                 return response()->json([
                     'success' => false,
@@ -302,7 +299,7 @@ class WorkspaceController extends Controller
      * )
      */
 
-      public function update(UpdateWorkspaceRequest $request, Workspace $workspace)
+      public function update(WorkspaceRequest $request, Workspace $workspace)
       {
           try {
               // Update the team

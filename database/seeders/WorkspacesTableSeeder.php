@@ -17,14 +17,16 @@ class WorkspacesTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $color_array = ['#3cb371', '#ee82ee', '#ffa500'];
         DB::table('workspaces')->insert([
-            ['name' => 'WWU', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Dekoding', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Sumanas', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'WWU', 'bg_color' => '#3cb371', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Dekoding', 'bg_color' => '#ee82ee', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Sumanas', 'bg_color' => '#ffa500', 'admin_id' => null, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
         $workspaces = DB::table('workspaces')->get();
         foreach ($workspaces as $key=>$workspace) {
             $boardData['name'] = 'General Tasks';
+            $boardData['bg_color'] = $color_array[$key];
             $boardData['workspace_id'] = $workspace->id;
             $boardData['created_by'] = 1;
             // Create the Team

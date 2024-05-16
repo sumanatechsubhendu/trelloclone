@@ -16,6 +16,7 @@ class BoardResource extends JsonResource
     {
         return [
             'name' => $this->name,
+            'bg_color' => $this->bg_color,
             'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,

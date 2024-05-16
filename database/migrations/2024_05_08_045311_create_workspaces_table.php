@@ -16,6 +16,7 @@ class CreateWorkspacesTable extends Migration
         Schema::create('workspaces', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
+            $table->string('bg_color', 7)->comment('Color code in hex format like #FFFEEE');
             $table->unsignedBigInteger('admin_id')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->timestamps();

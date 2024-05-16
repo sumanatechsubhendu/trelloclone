@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Workspace extends Model
 {
-    protected $fillable = ['name', 'admin_id', 'created_by'];
+    protected $fillable = ['name', 'bg_color', 'admin_id', 'created_by'];
 
     /**
      * Get the user who is the admin of the workspace.

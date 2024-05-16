@@ -34,6 +34,7 @@ class BoardRequest extends FormRequest
         return [
             'name' => 'required|unique:boards,name,'.($this->board ? $this->board->id.',id,workspace_id,'.$this->board->workspace_id : ''),
             'workspace_id' => 'required|exists:workspaces,id',
+            'bg_color' => 'required|regex:/^#[a-fA-F0-9]{6}$/'
         ];
     }
 

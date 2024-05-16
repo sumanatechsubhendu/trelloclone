@@ -16,6 +16,7 @@ class CreateBoardsTable extends Migration
         Schema::create('boards', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
+            $table->string('bg_color', 7)->comment('Color code in hex format like #FFFEEE');
             $table->unsignedBigInteger('workspace_id');
             $table->unsignedBigInteger('admin_id')->nullable();
             $table->unsignedBigInteger('created_by');
