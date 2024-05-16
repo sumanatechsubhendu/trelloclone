@@ -346,4 +346,72 @@ class WorkspaceMemberController extends Controller
         $workspaceMember->delete();
         return response()->json(null, 204);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/list-members-by-workspace-id/{workspaceId}",
+     *     operationId="getMembersByWorkspaceId",
+     *     tags={"Workspace Members"},
+     *     summary="Get member list by workspace ID",
+     *     description="Returns the list of members by workspace ID.",
+     *     @OA\Parameter(
+     *         name="workspaceId",
+     *         in="path",
+     *         description="ID of the workspace to fetch members",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/WorkspaceMember")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Workspace not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Workspace not found")
+     *         )
+     *     ),
+     *     security={{"bearerAuth": {}}}
+     * )
+     */
+    public function listMembersByWorkspaceId($workspaceId)
+    {
+        try {
+            $members = WorkspaceMember::with('user')->where('workspace_id', $workspaceId)->get();
+
+            // Check if any members found
+            if ($members->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No workspace members found for the given workspace ID'
+                ], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            $list_members = $members->map(function ($member) {
+                return [
+                    'workspace_members_id' => $member->id,
+                    'workspace_id' => $member->workspace_id,
+                    'user_id' => $member->user_id,
+                    'name' => $member->user->name,
+                    'email' => $member->user->email
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $list_members
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Workspace not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+    }
 }

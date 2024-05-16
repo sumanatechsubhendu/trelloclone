@@ -1328,96 +1328,6 @@
                 ]
             }
         },
-        "/api/workspaces/{workspace}/workspace-image": {
-            "post": {
-                "tags": [
-                    "uploadImage"
-                ],
-                "summary": "Upload a workspace image",
-                "description": "Upload a workspace image",
-                "operationId": "uploadWorkspaceImage",
-                "parameters": [
-                    {
-                        "name": "workspace",
-                        "in": "path",
-                        "description": "Workspace ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "workspace image data",
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "required": [
-                                    "image"
-                                ],
-                                "properties": {
-                                    "image": {
-                                        "description": "Image file to upload",
-                                        "type": "string",
-                                        "format": "binary"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Profile image uploaded successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Profile image uploaded successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "image": [
-                                                    "The image field is required."
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/sections": {
             "get": {
                 "tags": [
@@ -2853,155 +2763,6 @@
                 ]
             }
         },
-        "/api/list-workspaces": {
-            "get": {
-                "tags": [
-                    "UserDashboard"
-                ],
-                "summary": "List workspaces",
-                "description": "Returns the list of workspaces for the authenticated user.",
-                "operationId": "listWorkspaces",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "workspaces": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/list-boards": {
-            "get": {
-                "tags": [
-                    "UserDashboard"
-                ],
-                "summary": "List boards",
-                "description": "Returns the list of boards for the authenticated user's workspaces.",
-                "operationId": "listBoards",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "boards": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Board"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No boards found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No boards found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/workspace-details/{id}": {
-            "get": {
-                "tags": [
-                    "UserDashboard"
-                ],
-                "summary": "Get workspace details by ID",
-                "description": "Returns the details of a workspace identified by the provided ID",
-                "operationId": "getWorkspaceDetailsById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the workspace to fetch",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Workspace"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Workspace not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Workspace not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/workspaces": {
             "get": {
                 "tags": [
@@ -3682,6 +3443,67 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Workspace member not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/list-members-by-workspace-id/{workspaceId}": {
+            "get": {
+                "tags": [
+                    "Workspace Members"
+                ],
+                "summary": "Get member list by workspace ID",
+                "description": "Returns the list of members by workspace ID.",
+                "operationId": "getMembersByWorkspaceId",
+                "parameters": [
+                    {
+                        "name": "workspaceId",
+                        "in": "path",
+                        "description": "ID of the workspace to fetch members",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkspaceMember"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Workspace not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Workspace not found"
                                         }
                                     },
                                     "type": "object"
