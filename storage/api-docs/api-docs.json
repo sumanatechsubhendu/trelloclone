@@ -1238,6 +1238,114 @@
                 ]
             }
         },
+        "/api/cards": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get a list of cards",
+                "description": "Retrieves a list of cards.",
+                "operationId": "getCardList",
+                "responses": {
+                    "200": {
+                        "description": "A list of cards",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Card"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Authentication failed or user lacks necessary permissions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No cards found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No cards found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Create a new card",
+                "description": "Store a newly created card in storage.",
+                "operationId": "6a1db83adb51fba2ac318a78bc2a4fde",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Card"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Card created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    }
+                }
+            }
+        },
         "/api/users/{user}/profile-image": {
             "post": {
                 "tags": [
@@ -3649,6 +3757,44 @@
                 },
                 "type": "object"
             },
+            "Card": {
+                "properties": {
+                    "id": {
+                        "description": "The ID of the card",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "description": "The title of the card",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "The description of the card",
+                        "type": "string"
+                    },
+                    "board_section_id": {
+                        "description": "The ID of the board section the card belongs to",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "position_id": {
+                        "description": "The position ID of the card within its board section",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "created_by": {
+                        "description": "The ID of the user who created the card",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "created_at": {
+                        "description": "The date and time when the card was created",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Section": {
                 "properties": {
                     "id": {
@@ -3861,6 +4007,10 @@
         {
             "name": "Boards",
             "description": "API endpoints for managing boards"
+        },
+        {
+            "name": "Cards",
+            "description": "API endpoints for managing cards"
         },
         {
             "name": "Sections",
