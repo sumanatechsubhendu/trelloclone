@@ -399,7 +399,8 @@ class WorkspaceMemberController extends Controller
                     'workspace_id' => $member->workspace_id,
                     'user_id' => $member->user_id,
                     'name' => $member->user->name,
-                    'email' => $member->user->email
+                    'email' => $member->user->email,
+                    'profile_image' => $member->user->profile_image,
                 ];
             });
 

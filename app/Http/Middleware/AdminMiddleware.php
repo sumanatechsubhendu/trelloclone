@@ -13,10 +13,11 @@ class AdminMiddleware
         if ($request->user() && $request->user()->role === 'admin') {
             return $next($request);
         }
-
-        // If the user is not an admin, redirect or return an error response
-        return redirect('/')->with('error', 'You do not have permission to access this resource.');
         // or you can return an error response
-        // return response()->json(['error' => 'Unauthorized'], 403);
+        return response()->json([
+            'success' => false,
+            'message' => 'You do not have permission to access this resource.',
+            'error' => 'Forbidden'
+        ], 403);
     }
 }

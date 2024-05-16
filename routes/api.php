@@ -46,6 +46,7 @@ Route::middleware('auth:api')->group( function () {
         Route::resource('sections', SectionController::class);
         Route::resource('boardSections', BoardSectionController::class);
         Route::get('list-members-by-workspace-id/{workspaceId}', [WorkspaceMemberController::class, 'listMembersByWorkspaceId']);
+        Route::get('list-members', [UserController::class, 'listMembers']);
     });
     Route::get('workspaces', [WorkspaceController::class, 'index']);
     Route::get('workspaces/{workspaces}', [WorkspaceController::class, 'show']);
