@@ -115,6 +115,7 @@ class WorkspaceController extends Controller
         }
         return response()->json([
             'success' => true,
+            'message' => "Workspace list retrieved successfully",
             'data' => WorkspaceResource::collection($workspaces)
         ]);
     }
@@ -197,7 +198,11 @@ class WorkspaceController extends Controller
         }
         // Now, you can insert the board sections
         BoardSection::insert($boardSections);
-        return new WorkspaceResource($workspaceObj);
+        return response()->json([
+            'success' => true,
+            'message' => 'Workspace created successfully.',
+            'data' => new WorkspaceResource($workspaceObj)
+        ], JsonResponse::HTTP_OK);
      }
 
      /**
@@ -260,6 +265,7 @@ class WorkspaceController extends Controller
         }
         return response()->json([
             'success' => true,
+            'message' => 'Workspace details retrieved successfully.',
             'data' => new WorkspaceResourceWithBoards($workspaces)
         ]);
      }
@@ -307,10 +313,8 @@ class WorkspaceController extends Controller
 
               return response()->json([
                   'success' => true,
-                  'message' => 'Team updated successfully',
-                  'data' => [
-                      'team' => new WorkspaceResource($workspace)
-                  ]
+                  'message' => 'Workspace updated successfully',
+                  'data' => new WorkspaceResource($workspace)
               ]);
           } catch (ModelNotFoundException $e) {
               // Handle the 404 Not Found exception
