@@ -106,7 +106,7 @@ class WorkspaceController extends Controller
             if (empty($workspaceIds)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No workspace found'
+                    'message' => "You don't have access to any of the workspaces."
                 ], 404);
             }
 
