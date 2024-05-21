@@ -36,6 +36,7 @@ Route::post('reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:api')->group( function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify-token', [AuthController::class, 'verifyToken']);
+    Route::get('cards/search', [CardController::class, 'search'])->name('cards.search');
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('teams', TeamController::class);

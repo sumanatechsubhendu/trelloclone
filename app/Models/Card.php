@@ -10,5 +10,15 @@ class Card extends Model
         'title', 'description', 'board_section_id', 'position_id', 'created_by'
     ];
 
+    public function boardSection()
+    {
+        return $this->belongsTo(BoardSection::class, 'position_id');
+    }
+
+    public function board()
+    {
+        return $this->hasOneThrough(Board::class, BoardSection::class, 'id', 'id', 'board_section_id', 'board_id');
+    }
+
     // Define relationships if any
 }
