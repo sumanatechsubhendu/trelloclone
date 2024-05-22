@@ -143,5 +143,99 @@ class CardController extends Controller
         ], HttpResponse::HTTP_CREATED);
     }
 
+    /**
+    * @OA\Get(
+    *     path="/api/cards/search?title={title}",
+    *     summary="Get cards by search",
+    *     description="Retrieve cards based on the search criteria",
+    *     operationId="getCardsBySearch",
+    *     tags={"Cards"},
+    *     @OA\Parameter(
+    *         name="title",
+    *         in="query",
+    *         description="The title to search cards",
+    *         required=true,
+    *         @OA\Schema(type="string")
+    *     ),
+    *     @OA\Response(
+    *         response=200,
+    *         description="A list of cards based on the search criteria",
+    *         @OA\JsonContent(
+    *             type="array",
+    *             @OA\Items(ref="#/components/schemas/Card")
+    *         )
+    *     ),
+    *     @OA\Response(
+    *         response=404,
+    *         description="No cards found",
+    *         @OA\JsonContent(
+    *             @OA\Property(
+    *                 property="success",
+    *                 type="boolean",
+    *                 example=false
+    *             ),
+    *             @OA\Property(
+    *                 property="message",
+    *                 type="string",
+    *                 example="No cards found"
+    *             )
+    *         )
+    *      ),
+    *     @OA\Response(
+    *         response=401,
+    *         description="Unauthorized: Authentication failed or user lacks necessary permissions.",
+    *         @OA\JsonContent(
+    *             @OA\Property(
+    *                 property="message",
+    *                 type="string",
+    *                 example="Unauthorized"
+    *             )
+    *         )
+    *     ),
+    *     security={
+    *         {"bearerAuth": {}}
+    *     }
+    * )
+    */
+
+    public function search(Request $request)
+    { 
+        $query = Card::query()->with('board');
+
+        if ($request->has('title')) {
+            $title = $request->input('title');
+            $query->where(function($q) use ($title) {
+                $q->where('title', 'like', '%' . $title . '%')
+                  ->orWhere('description', 'like', '%' . $title . '%');
+            });
+        }
+    
+        $cards = $query->get();
+    
+        if ($cards->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No cards found matching the criteria'
+            ], HttpResponse::HTTP_NOT_FOUND);
+        }
+    
+        $data = $cards->map(function ($card) {
+            return [
+                'id' => $card->id,
+                'title' => $card->title,
+                'description' => $card->description,
+                'board_name' => $card->board->name,
+                'section_name' => $card->boardSection->section->title,
+                'created_at' => $card->created_at,
+                'updated_at' => $card->updated_at,
+            ];
+        });
+    
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
     // Implement update, show, and delete methods similar to store method above...
 }

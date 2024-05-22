@@ -1326,6 +1326,83 @@
                 }
             }
         },
+        "/api/cards/search?title={title}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get cards by search",
+                "description": "Retrieve cards based on the search criteria",
+                "operationId": "getCardsBySearch",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "The title to search cards",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of cards based on the search criteria",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Card"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No cards found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No cards found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Authentication failed or user lacks necessary permissions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/{user}/profile-image": {
             "post": {
                 "tags": [
