@@ -120,7 +120,18 @@ class SectionController extends Controller
         // Fetch users with pagination
         $users = Section::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return SectionResource::collection($users);
+        if (empty($users)) {
+            return response()->json([
+                'success' => false,
+                'message' => "You don't have access to any of the Section."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Section list retrieved successfully",
+            'data' => SectionResource::collection($users)
+        ]);
     }
 
     /**
@@ -177,7 +188,11 @@ class SectionController extends Controller
         $team = Section::create($data);
 
         // Return the newly created team resource
-        return new SectionResource($team);
+        return response()->json([
+            'success' => true,
+            'message' => 'Section created successfully.',
+            'data' => new SectionResource($team)
+        ], JsonResponse::HTTP_OK);
     }
 
      /**
@@ -223,6 +238,7 @@ class SectionController extends Controller
             $team = Section::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'Section details retrieved successfully.',
                 'data' => new SectionResource($team)
             ]);
         } catch (ModelNotFoundException $e) {

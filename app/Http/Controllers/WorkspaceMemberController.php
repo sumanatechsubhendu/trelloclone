@@ -116,7 +116,18 @@ class WorkspaceMemberController extends Controller
         // Fetch workspaces with pagination
         $workspaces = WorkspaceMember::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return WorkspaceMemberResource::collection($workspaces);
+        if (empty($workspaces)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Workspace members not found."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Workspace member list retrieved successfully",
+            'data' => WorkspaceMemberResource::collection($workspaces)
+        ]);
     }
 
     /**
@@ -180,7 +191,11 @@ class WorkspaceMemberController extends Controller
          $workspaceMember = WorkspaceMember::create($data);
 
          // Return the newly created workspace member resource
-         return new WorkspaceMemberResource($workspaceMember);
+         return response()->json([
+            'success' => true,
+            'message' => 'Workspace member created successfully.',
+            'data' => new WorkspaceMemberResource($workspaceMember)
+        ], JsonResponse::HTTP_OK);
      }
 
     /**
@@ -220,6 +235,7 @@ class WorkspaceMemberController extends Controller
             $team = WorkspaceMember::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'Workspace member details retrieved successfully.',
                 'data' => new WorkspaceMemberResource($team)
             ]);
         } catch (ModelNotFoundException $e) {
@@ -396,6 +412,7 @@ class WorkspaceMemberController extends Controller
 
             return response()->json([
                 'success' => true,
+                'message' => "Workspace member list retrieved successfully",
                 'data' => $list_members
             ]);
         } catch (ModelNotFoundException $e) {

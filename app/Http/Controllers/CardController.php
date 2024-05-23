@@ -99,7 +99,19 @@ class CardController extends Controller
     public function index()
     {
         $cards = Card::all();
-        return CardResource::collection($cards);
+        
+        if (empty($cards)) {
+            return response()->json([
+                'success' => false,
+                'message' => "You don't have access to any of the card."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Card list retrieved successfully",
+            'data' => CardResource::collection($cards)
+        ]);
     }
 
     /**
@@ -139,6 +151,7 @@ class CardController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => "Card created successfully",
             'data' => new CardResource($card)
         ], HttpResponse::HTTP_CREATED);
     }
@@ -233,6 +246,7 @@ class CardController extends Controller
     
         return response()->json([
             'success' => true,
+            'message' => "Card list retrieved successfully",
             'data' => $data
         ]);
     }

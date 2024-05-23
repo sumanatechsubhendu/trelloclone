@@ -109,9 +109,20 @@ class UserController extends Controller
         $pageNumber = $request->input('page', 1);
 
         // Fetch users with pagination
-        $users = User::paginate($pageSize, ['*'], 'page', $pageNumber);
+        $users = User::paginate($pageSize, ['*'], 'page', $pageNumber); 
+        
+        if (empty($users)) {
+            return response()->json([
+                'success' => false,
+                'message' => "No users found."
+            ], 404);
+        }
 
-        return UserResource::collection($users);
+        return response()->json([
+            'success' => true,
+            'message' => "Users list retrieved successfully",
+            'data' => UserResource::collection($users)
+        ]);
     }
 
     /**
@@ -163,7 +174,11 @@ class UserController extends Controller
         $user = User::create($data);
 
         // Return the newly created user resource
-        return new UserResource($user);
+        return response()->json([
+            'success' => true,
+            'message' => 'User created successfully!',
+            'user' => new UserResource($user)
+        ], 201);
     }
 
     /**
@@ -202,6 +217,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'User retrieved successfully',
                 'data' => new UserResource($user)
             ]);
         } catch (ModelNotFoundException $e) {
@@ -248,16 +264,23 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        // Update the user
-        $user->update($request->validated());
+        try {
+             // Update the user
+            $user->update($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'data' => [
-                'user' => new UserResource($user)
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => [
+                    'user' => new UserResource($user)
+                ]
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
     }
 
     /**
@@ -353,6 +376,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Workspace members retrieved successfully',
             'data' => $list_members
         ]);
     }
