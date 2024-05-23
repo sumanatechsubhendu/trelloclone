@@ -108,7 +108,18 @@ class TeamController extends Controller
         // Fetch users with pagination
         $users = Team::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return TeamResource::collection($users);
+        if (empty($users)) {
+            return response()->json([
+                'success' => false,
+                'message' => "You don't have access to any of the team."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Team list retrieved successfully",
+            'data' => TeamResource::collection($users)
+        ]);
     }
 
     /**
@@ -157,7 +168,11 @@ class TeamController extends Controller
          $team = Team::create($data);
 
          // Return the newly created team resource
-         return new TeamResource($team);
+         return response()->json([
+            'success' => true,
+            'message' => 'Team created successfully.',
+            'data' => new TeamResource($team)
+        ], JsonResponse::HTTP_OK);
      }
 
 
@@ -197,6 +212,7 @@ class TeamController extends Controller
              $team = Team::findOrFail($id);
              return response()->json([
                  'success' => true,
+                 'message' => "Team retrieved successfully",
                  'data' => new TeamResource($team)
              ]);
          } catch (ModelNotFoundException $e) {

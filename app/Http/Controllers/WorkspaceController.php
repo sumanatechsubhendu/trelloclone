@@ -188,7 +188,7 @@ class WorkspaceController extends Controller
             ];
         }
         // Now, you can insert the board sections
-        BoardSection::insert($boardSections);
+        BoardSection::insert($boardSections);        
         return response()->json([
             'success' => true,
             'message' => 'Workspace created successfully.',

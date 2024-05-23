@@ -118,7 +118,18 @@ class BoardsController extends Controller
         // Fetch users with pagination
         $users = Board::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return BoardResource::collection($users);
+        if (empty($users)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No workspace found or there is no access.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Board list retrieved successfully.',
+            'data' => BoardResource::collection($users)
+        ]);
     }
 
     /**
@@ -191,7 +202,11 @@ class BoardsController extends Controller
         BoardSection::insert($boardSections);
 
         // Return the newly created team resource
-        return new BoardResource($board);
+        return response()->json([
+            'success' => true,
+            'message' => 'Board created successfully.',
+            'data' => new BoardResource($board)
+        ], JsonResponse::HTTP_OK);
     }
 
 
@@ -231,6 +246,7 @@ class BoardsController extends Controller
             $team = Board::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'Board details retrieved successfully.',
                 'data' => new TeamResource($team)
             ]);
         } catch (ModelNotFoundException $e) {
