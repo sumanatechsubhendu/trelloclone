@@ -391,7 +391,12 @@ class WorkspaceMemberController extends Controller
     public function listMembersByWorkspaceId($workspaceId)
     {
         try {
-            $members = WorkspaceMember::with('user')->where('workspace_id', $workspaceId)->get();
+            $members = WorkspaceMember::with('user')
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('user', function ($query) {
+                $query->where('role', '!=', 'admin');
+            })
+            ->get();
 
             // Check if any members found
             if ($members->isEmpty()) {
