@@ -70,4 +70,9 @@ class User extends Authenticatable
         // Example: return asset('storage/default-placeholder.jpg');
         return null;
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

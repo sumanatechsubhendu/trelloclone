@@ -20,5 +20,10 @@ class Card extends Model
         return $this->hasOneThrough(Board::class, BoardSection::class, 'id', 'id', 'board_section_id', 'board_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     // Define relationships if any
 }

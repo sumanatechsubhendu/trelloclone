@@ -1218,6 +1218,67 @@
                 ]
             }
         },
+        "/api/boards/{id}/cards": {
+            "get": {
+                "tags": [
+                    "Boards"
+                ],
+                "summary": "Get cards by board ID",
+                "description": "Retrieves all cards associated with the specified board ID.",
+                "operationId": "getCardsByBoardId",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the board",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Card"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Board not found or no cards found for the board",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No board found with the specified ID"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cards": {
             "get": {
                 "tags": [
@@ -1326,6 +1387,80 @@
                 }
             }
         },
+        "/api/cards/{id}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get a specific card by ID",
+                "description": "Retrieves a specific card based on its ID.",
+                "operationId": "getCardById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the card to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Card found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Card"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Card not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Authentication failed or user lacks necessary permissions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cards/search?title={title}": {
             "get": {
                 "tags": [
@@ -1388,6 +1523,242 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cards/{cardId}/comments": {
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Create a new comment for a card",
+                "description": "Store a newly created comment in storage.",
+                "operationId": "c199d00089a83c8cda7c26fb0935c676",
+                "parameters": [
+                    {
+                        "name": "cardId",
+                        "in": "path",
+                        "description": "ID of the card to add comment to",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "This is a comment"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Comment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "The ID of the comment",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "content": {
+                                                    "description": "The content of the comment",
+                                                    "type": "string"
+                                                },
+                                                "card_id": {
+                                                    "description": "The ID of the card associated with the comment",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "user_id": {
+                                                    "description": "The ID of the user who created the comment",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "created_at": {
+                                                    "description": "The date and time when the comment was created",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Card not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/{comment}/replays": {
+            "post": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Create a new replay for a comment",
+                "description": "Store a newly created replay for a comment in storage.",
+                "operationId": "ee87aa574800ae441ce0dfab801a0296",
+                "parameters": [
+                    {
+                        "name": "comment",
+                        "in": "path",
+                        "description": "The ID of the comment to add a replay to",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "replay_content"
+                                ],
+                                "properties": {
+                                    "replay_content": {
+                                        "type": "string",
+                                        "example": "This is a replay"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Replay stored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Replay stored successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "The ID of the replay",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "replay_content": {
+                                                    "description": "The content of the replay",
+                                                    "type": "string"
+                                                },
+                                                "comment_id": {
+                                                    "description": "The ID of the comment associated with the replay",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "user_id": {
+                                                    "description": "The ID of the user who created the replay",
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                "created_at": {
+                                                    "description": "The date and time when the replay was created",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "description": "The date and time when the replay was last updated",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "404": {
+                        "description": "Error: Comment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Comment not found"
                                         }
                                     },
                                     "type": "object"

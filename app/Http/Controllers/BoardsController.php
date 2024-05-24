@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BoardRequest;
 use App\Http\Resources\BoardResource;
+use App\Http\Resources\CardResource;
 use App\Http\Resources\TeamResource;
 use App\Models\Board;
 use App\Models\BoardSection;
@@ -297,6 +298,70 @@ class BoardsController extends Controller
               ], JsonResponse::HTTP_NOT_FOUND);
           }
       }
+
+    /**
+     * @OA\Get(
+     *     path="/api/boards/{id}/cards",
+     *     operationId="getCardsByBoardId",
+     *     tags={"Boards"},
+     *     summary="Get cards by board ID",
+     *     description="Retrieves all cards associated with the specified board ID.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the board",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Card")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Board not found or no cards found for the board",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No board found with the specified ID")
+     *         )
+     *     ),
+     *     security={{"bearerAuth": {}}}
+     * )
+     */
+    public function getCardsByBoardId($boardId)
+    {
+        $board = Board::with('sections')->find($boardId);
+
+        // Check if the board exists
+        if (!$board) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No board found with the specified ID'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Retrieve cards directly filtered by the board_id
+        $cards = $board->cards;
+
+        // Check if any cards are found
+        if ($cards->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No cards found for the specified board'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Return card details using CardResource
+        return response()->json([
+            'success' => true,
+            'message' => 'Cards retrieved successfully',
+            'data' => CardResource::collection($cards)
+        ], JsonResponse::HTTP_OK);
+    }
 
     /**
      * @OA\Delete(
