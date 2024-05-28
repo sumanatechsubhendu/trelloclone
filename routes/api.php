@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group( function () {
     Route::post('/cards/{cardId}/comments', [CardController::class, 'storeComment']);
     Route::get('/boards/{boardId}/cards/', [BoardsController::class, 'getCardsByBoardId']);
     Route::post('/comments/{comment}/replays', [CardController::class, 'storeCommentReplay']);
+    Route::get('/workspaceMembers/nonMembers', [WorkspaceMemberController::class, 'getNonWorkspaceMembers']);
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('teams', TeamController::class);
