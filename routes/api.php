@@ -38,6 +38,8 @@ Route::middleware('auth:api')->group( function () {
     Route::post('verify-token', [AuthController::class, 'verifyToken']);
     Route::get('cards/search', [CardController::class, 'search'])->name('cards.search');
     Route::get('/workspaceMembers/nonMembers', [WorkspaceMemberController::class, 'getNonWorkspaceMembers']);
+    Route::post('/cards/{card}/members', [CardController::class, 'addMember']);
+    Route::get('/cards/{cardId}/non-members', [CardController::class, 'getNonCardMembers']);
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('teams', TeamController::class);
