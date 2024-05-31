@@ -24,7 +24,12 @@ class Board extends Model
 
     public function sections()
     {
-        return $this->hasMany(BoardSection::class, 'board_id'); // Specify the foreign key column name
+        return $this->hasMany(BoardSection::class, 'board_id', 'id'); // Specify the foreign key column name
+    }
+
+    public function cards()
+    {
+        return $this->hasManyThrough(Card::class, BoardSection::class, 'board_id', 'board_section_id', 'id', 'id');
     }
 
     public function createdBy()

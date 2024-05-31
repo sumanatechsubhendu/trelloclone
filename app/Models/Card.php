@@ -20,6 +20,11 @@ class Card extends Model
         return $this->hasOneThrough(Board::class, BoardSection::class, 'id', 'id', 'board_section_id', 'board_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function members()
     {
         return $this->belongsToMany(WorkspaceMember::class, 'card_members', 'card_id', 'workspace_member_id');
