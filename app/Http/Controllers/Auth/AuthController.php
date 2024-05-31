@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Mail\ForgotPasswordMail;
 use App\Mail\ResetPasswordMail;
+use App\Models\Workspace;
+use App\Models\WorkspaceMember;
 use Illuminate\Support\Facades\Mail;
 use DB;
 use Carbon\Carbon;
@@ -169,6 +171,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'workspace_id' => $this->getDefaultWorkspaceId(),
                 'token_type' => 'Bearer',
                 'image' => $user->profile_image,
                 'status' => $user->status,
@@ -187,6 +190,27 @@ class AuthController extends Controller
             // Token is invalid or missing, return error response
             return response()->json(['valid' => false, 'message' => 'Unauthorized'], 401);
         }
+    }
+
+    public function getDefaultWorkspaceId()
+    {
+        $user = Auth::user();
+
+        // If the user is an admin, retrieve all workspaces
+        if ($user->role == 'admin') {
+            $workspaces = Workspace::first();
+        } else {
+            // Retrieve the logged-in user's workspace IDs using WorkspaceMember model
+            $workspaceIds = WorkspaceMember::where('user_id', $user->id)->pluck('workspace_id')->all();
+
+            if (empty($workspaceIds)) {
+                return null;
+            }
+
+            // Retrieve workspaces for the user
+            $workspaces = Workspace::whereIn('id', $workspaceIds)->first();
+        }
+        return $workspaces->id;
     }
 
     /**
