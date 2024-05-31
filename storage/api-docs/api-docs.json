@@ -1384,7 +1384,12 @@
                     "422": {
                         "description": "Unprocessable Entity"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/cards/{id}": {

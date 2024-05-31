@@ -104,6 +104,7 @@ class CardController extends Controller
      *             @OA\Property(property="message", type="string", example="No cards found"),
      *         ),
      *     ),
+     *     security={{"bearerAuth": {}}},
      * )
      */
     public function index()
@@ -150,7 +151,8 @@ class CardController extends Controller
      *     @OA\Response(
      *         response=422,
      *         description="Unprocessable Entity"
-     *     )
+     *     ),
+     *     security={{"bearerAuth": {}}},
      * )
      */
     public function store(CardRequest $request)
