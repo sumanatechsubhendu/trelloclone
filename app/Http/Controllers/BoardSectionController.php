@@ -128,7 +128,17 @@ class BoardSectionController extends Controller
         // Fetch workspaces with pagination
         $workspaces = BoardSection::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return BoardSectionResource::collection($workspaces);
+        if (empty($workspaces)) {
+            return response()->json([
+                'success' => false,
+                'message' => "You don't have access to any of the boardsection."
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Board Section list retrieved successfully",
+            'data' => BoardSectionResource::collection($workspaces)
+        ]);
     }
 
     /**
@@ -195,7 +205,11 @@ class BoardSectionController extends Controller
          $workspaceMember = BoardSection::create($data);
 
          // Return the newly created workspace member resource
-         return new BoardSectionResource($workspaceMember);
+         return response()->json([
+            'success' => true,
+            'message' => 'Board section created successfully.',
+            'data' => new BoardSectionResource($workspaceMember)
+        ], JsonResponse::HTTP_OK);
      }
 
     /**
@@ -235,6 +249,7 @@ class BoardSectionController extends Controller
             $team = BoardSection::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'Board section details retrieved successfully.',
                 'data' => new BoardSectionResource($team)
             ]);
         } catch (ModelNotFoundException $e) {

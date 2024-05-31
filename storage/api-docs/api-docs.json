@@ -1774,6 +1774,157 @@
                 ]
             }
         },
+        "/api/cards/{card}/members": {
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Add a member to a card",
+                "description": "Add a member to a specific card",
+                "operationId": "addCardMember",
+                "parameters": [
+                    {
+                        "name": "card",
+                        "in": "path",
+                        "description": "ID of the card",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "workspace_member_id"
+                                ],
+                                "properties": {
+                                    "workspace_member_id": {
+                                        "description": "ID of the user to add to the card",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Member added to card successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Member added to card successfully."
+                                        },
+                                        "card": {
+                                            "$ref": "#/components/schemas/Card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card or User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Card or User not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cards/{cardId}/non-members": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get users who are not members of a specific card",
+                "description": "Retrieves users who are not members of the specified card.",
+                "operationId": "getNonCardMembers",
+                "parameters": [
+                    {
+                        "name": "cardId",
+                        "in": "path",
+                        "description": "ID of the card",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Users who are not members of the card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Card not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/{user}/profile-image": {
             "post": {
                 "tags": [
@@ -4039,6 +4190,72 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Workspace not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/workspaceMembers/nonMembers": {
+            "get": {
+                "tags": [
+                    "Workspace Members"
+                ],
+                "summary": "Get a list of users who are not members of a workspace",
+                "description": "Retrieves a list of users who are not members of a specific workspace.",
+                "operationId": "getNonWorkspaceMembers",
+                "parameters": [
+                    {
+                        "name": "workspace_id",
+                        "in": "query",
+                        "description": "ID of the workspace",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of users who are not members of the workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "workspace_id": [
+                                                    "The workspace_id field is required."
+                                                ]
+                                            }
                                         }
                                     },
                                     "type": "object"

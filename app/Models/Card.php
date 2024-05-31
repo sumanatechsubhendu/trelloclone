@@ -25,5 +25,10 @@ class Card extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function members()
+    {
+        return $this->belongsToMany(WorkspaceMember::class, 'card_members', 'card_id', 'workspace_member_id');
+    }
+
     // Define relationships if any
 }

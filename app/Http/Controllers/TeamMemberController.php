@@ -111,7 +111,18 @@ class TeamMemberController extends Controller
         // Fetch workspaces with pagination
         $workspaces = TeamMember::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return TeamMemberResource::collection($workspaces);
+        if (empty($workspaces)) {
+            return response()->json([
+                'success' => false,
+                'message' => "You don't have access to any of the team member."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Workspace list retrieved successfully",
+            'data' => TeamMemberResource::collection($workspaces)
+        ]);
     }
 
     /**
@@ -173,7 +184,11 @@ class TeamMemberController extends Controller
          $team = TeamMember::create($data);
 
          // Return the newly created team resource
-         return new TeamMemberResource($team);
+         return response()->json([
+            'success' => true,
+            'message' => 'Team member created successfully.',
+            'data' => new TeamMemberResource($team)
+        ], JsonResponse::HTTP_OK);
      }
 
     /**
@@ -213,6 +228,7 @@ class TeamMemberController extends Controller
               $team = TeamMember::findOrFail($id);
               return response()->json([
                   'success' => true,
+                  'message' => 'Team member retrieved successfully.',
                   'data' => new TeamMemberResource($team)
               ]);
           } catch (ModelNotFoundException $e) {

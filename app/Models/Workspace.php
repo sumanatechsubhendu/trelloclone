@@ -33,4 +33,9 @@ class Workspace extends Model
     {
         return $this->morphOne(Image::class, 'imageable');
     }
+
+    public function members()
+    {
+        return $this->hasMany(WorkspaceMember::class, 'workspace_id');
+    }
 }

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\WorkspaceMemberRequest;
 use App\Http\Resources\WorkspaceMemberResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\WorkspaceMember;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -116,7 +118,18 @@ class WorkspaceMemberController extends Controller
         // Fetch workspaces with pagination
         $workspaces = WorkspaceMember::paginate($pageSize, ['*'], 'page', $pageNumber);
 
-        return WorkspaceMemberResource::collection($workspaces);
+        if (empty($workspaces)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Workspace members not found."
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Workspace member list retrieved successfully",
+            'data' => WorkspaceMemberResource::collection($workspaces)
+        ]);
     }
 
     /**
@@ -180,7 +193,11 @@ class WorkspaceMemberController extends Controller
          $workspaceMember = WorkspaceMember::create($data);
 
          // Return the newly created workspace member resource
-         return new WorkspaceMemberResource($workspaceMember);
+         return response()->json([
+            'success' => true,
+            'message' => 'Workspace member created successfully.',
+            'data' => new WorkspaceMemberResource($workspaceMember)
+        ], JsonResponse::HTTP_OK);
      }
 
     /**
@@ -220,6 +237,7 @@ class WorkspaceMemberController extends Controller
             $team = WorkspaceMember::findOrFail($id);
             return response()->json([
                 'success' => true,
+                'message' => 'Workspace member details retrieved successfully.',
                 'data' => new WorkspaceMemberResource($team)
             ]);
         } catch (ModelNotFoundException $e) {
@@ -373,7 +391,12 @@ class WorkspaceMemberController extends Controller
     public function listMembersByWorkspaceId($workspaceId)
     {
         try {
-            $members = WorkspaceMember::with('user')->where('workspace_id', $workspaceId)->get();
+            $members = WorkspaceMember::with('user')
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('user', function ($query) {
+                $query->where('role', '!=', 'admin');
+            })
+            ->get();
 
             // Check if any members found
             if ($members->isEmpty()) {
@@ -396,6 +419,7 @@ class WorkspaceMemberController extends Controller
 
             return response()->json([
                 'success' => true,
+                'message' => "Workspace member list retrieved successfully",
                 'data' => $list_members
             ]);
         } catch (ModelNotFoundException $e) {
@@ -404,5 +428,73 @@ class WorkspaceMemberController extends Controller
                 'message' => 'Workspace not found'
             ], JsonResponse::HTTP_NOT_FOUND);
         }
+    }
+        /**
+     * @OA\Get(
+     *     path="/api/workspaceMembers/nonMembers",
+     *     summary="Get a list of users who are not members of a workspace",
+     *     tags={"Workspace Members"},
+     *     description="Retrieves a list of users who are not members of a specific workspace.",
+     *     operationId="getNonWorkspaceMembers",
+     *     @OA\Parameter(
+     *         name="workspace_id",
+     *         in="query",
+     *         description="ID of the workspace",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64",
+     *         ),
+     *     ),
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of users who are not members of the workspace",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/User"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request, invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object", example={"workspace_id": {"The workspace_id field is required."}}),
+     *         ),
+     *     ),
+     * )
+     */
+
+    public function getNonWorkspaceMembers(Request $request)
+    {
+        $request->validate([
+            'workspace_id' => 'required|integer|exists:workspaces,id',
+        ]);
+
+        $workspaceId = $request->input('workspace_id');
+
+        // Get user IDs who are members of the workspace
+        $memberUserIds = WorkspaceMember::where('workspace_id', $workspaceId)
+                                        ->pluck('user_id')
+                                        ->toArray();
+
+        // Get users who are not members of the workspace
+        $nonMembers = User::whereNotIn('id', $memberUserIds)
+        ->where('role', '<>', 'admin')
+        ->get();
+
+        if ($nonMembers->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => "No non-members found for this workspace.",
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Users who are not members of the workspace retrieved successfully",
+            'data' => UserResource::collection($nonMembers),
+        ]);
     }
 }
