@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CardRequest;
 use Illuminate\Http\Request;
 use App\Models\Card;
+use App\Models\User;
+use App\Models\CardMember;
+use App\Models\WorkspaceMember;
 use App\Http\Resources\CardResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -249,6 +253,152 @@ class CardController extends Controller
             'message' => "Card list retrieved successfully",
             'data' => $data
         ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/cards/{card}/members",
+     *     summary="Add a member to a card",
+     *     tags={"Cards"},
+     *     description="Add a member to a specific card",
+     *     operationId="addCardMember",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="card",
+     *         in="path",
+     *         description="ID of the card",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"workspace_member_id"},
+     *             @OA\Property(property="workspace_member_id", type="integer", description="ID of the user to add to the card")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Member added to card successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Member added to card successfully."),
+     *             @OA\Property(
+     *                 property="card",
+     *                 type="object",
+     *                 ref="#/components/schemas/Card"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Card or User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Card or User not found.")
+     *         )
+     *     )
+     * )
+     */
+    public function addMember(Request $request, $cardId)
+    {
+        $request->validate([
+            'workspace_member_id' => 'required|exists:workspace_members,id',
+        ]);
+
+        try {
+            $card = Card::findOrFail($cardId);
+            $member = WorkspaceMember::findOrFail($request->workspace_member_id);
+
+            // Check if the member is already in the card
+            if ($card->members()->where('workspace_member_id', $member->id)->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Member is already part of the card.'
+                ], HttpResponse::HTTP_CONFLICT);
+            }
+
+            $card->members()->attach($member->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Member added to card successfully.',
+            ], HttpResponse::HTTP_OK);
+        
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Card or User not found.'
+            ], HttpResponse::HTTP_NOT_FOUND);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/cards/{cardId}/non-members",
+     *     summary="Get users who are not members of a specific card",
+     *     description="Retrieves users who are not members of the specified card.",
+     *     operationId="getNonCardMembers",
+     *     tags={"Cards"},
+     *     @OA\Parameter(
+     *         name="cardId",
+     *         in="path",
+     *         description="ID of the card",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success: Users who are not members of the card",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/User")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Error: Card not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Card not found")
+     *         )
+     *     ),
+     *     security={{"bearerAuth": {}}}
+     * )
+     */
+
+    public function getNonCardMembers($cardId)
+    {
+        try {
+            $card = Card::findOrFail($cardId);
+            $workspace = $card->board->workspace;
+            $memberIds = $workspace->members->pluck('id');
+            $cardMemberIds = CardMember::where('card_id', $cardId)->pluck('workspace_member_id');
+            $filteredMemberIds = $memberIds->diff($cardMemberIds);
+
+            // Check if there are any non-card members found
+            if ($filteredMemberIds->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No non-members found for this workspace.",
+                ], HttpResponse::HTTP_NOT_FOUND);
+            }
+
+            // Fetch non-card members
+            $nonCardMembers = User::whereIn('id', WorkspaceMember::whereIn('id', $filteredMemberIds)->pluck('user_id'))->get();
+
+            // Return non-card members
+            return response()->json([
+                'success' => true,
+                'message' => "Users who are not members of the workspace retrieved successfully",
+                'data' => UserResource::collection($nonCardMembers),
+            ], HttpResponse::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "No non-members found for this workspace.",
+            ], HttpResponse::HTTP_NOT_FOUND);
+        }
     }
 
     // Implement update, show, and delete methods similar to store method above...

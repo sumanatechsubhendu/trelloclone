@@ -31,4 +31,9 @@ class WorkspaceMember extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function cardMembers()
+    {
+        return $this->hasMany(CardMember::class, 'workspace_member_id');
+    }
 }
