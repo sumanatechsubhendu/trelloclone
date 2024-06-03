@@ -366,7 +366,11 @@ class BoardSectionController extends Controller
 
     public function destroy(BoardSection $boardSection)
     {
-        $boardSection->delete();
-        return response()->json(null, 204);
+        try {
+            $boardSection->delete();
+            return response()->json(['success' => true, 'message' => 'Board sction deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete board section.'], 500);
+        }
     }
 }

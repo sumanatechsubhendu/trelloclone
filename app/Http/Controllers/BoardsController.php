@@ -410,7 +410,11 @@ class BoardsController extends Controller
      */
     public function destroy(Board $board)
     {
-        $board->delete();
-        return response()->json(null, 204);
+        try {
+            $board->delete();
+            return response()->json(['success' => true, 'message' => 'Board deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete board.'], 500);
+        }
     }
 }
