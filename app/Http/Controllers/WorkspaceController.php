@@ -348,7 +348,11 @@ class WorkspaceController extends Controller
 
      public function destroy(Workspace $workspace)
      {
-        $workspace->delete();
-        return response()->json([], 204);
+        try {
+            $workspace->delete();
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.'], 204);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete User.'], 500);
+        }
      }
 }

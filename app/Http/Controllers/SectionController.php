@@ -351,7 +351,12 @@ class SectionController extends Controller
 
     public function destroy(Section $section)
     {
-        $section->delete();
-        return response()->json(null, 204);
+        try {
+            $section->delete();
+            return response()->json(['success' => true, 'message' => 'Section deleted successfully.'], 204);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete Section.'], 500);
+        }
+        
     }
 }
