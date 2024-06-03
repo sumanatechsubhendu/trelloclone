@@ -353,9 +353,9 @@ class WorkspaceMemberController extends Controller
     {
         try {
             $workspaceMember->delete();
-            return response()->json(['success' => true, 'message' => 'Workspace member deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'Workspace member removed successfully.'], 204);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to delete workspace member.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to remove workspace member.'], 500);
         }
     }
 

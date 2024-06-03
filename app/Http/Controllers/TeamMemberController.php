@@ -344,9 +344,9 @@ class TeamMemberController extends Controller
       {
         try {
             $teamMember->delete();
-            return response()->json(['success' => true, 'message' => 'Team member deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'Team member removed successfully.'], 204);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to delete team member.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to remove team member.'], 500);
         }
       }
 }
