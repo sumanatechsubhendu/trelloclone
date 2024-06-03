@@ -312,7 +312,7 @@ class TeamController extends Controller
      {
         try {
             $team->delete();
-            return response()->json(['success' => true, 'message' => 'Team deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'Team deleted successfully.'], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete team.'], 500);
         }

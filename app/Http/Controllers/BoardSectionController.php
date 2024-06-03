@@ -368,7 +368,7 @@ class BoardSectionController extends Controller
     {
         try {
             $boardSection->delete();
-            return response()->json(['success' => true, 'message' => 'Board sction deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'Board sction deleted successfully.'], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete board section.'], 500);
         }

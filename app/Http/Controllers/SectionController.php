@@ -353,7 +353,7 @@ class SectionController extends Controller
     {
         try {
             $section->delete();
-            return response()->json(['success' => true, 'message' => 'Section deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'Section deleted successfully.'], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete Section.'], 500);
         }

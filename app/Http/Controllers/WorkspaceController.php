@@ -350,7 +350,7 @@ class WorkspaceController extends Controller
      {
         try {
             $workspace->delete();
-            return response()->json(['success' => true, 'message' => 'User deleted successfully.'], 204);
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.'], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete User.'], 500);
         }
