@@ -286,7 +286,6 @@ class WorkspaceMemberController extends Controller
     public function update(WorkspaceMemberRequest $request, WorkspaceMember $workspaceMember)
     {
         try {
-
             // Extract validated data
             $data = $request->validated();
             // Check if the workspace member already exists

@@ -209,12 +209,15 @@ class CardController extends Controller
         try {
             $card = Card::findOrFail($id);
             $comments = $card->comments()->with('user', 'replays.user')->get();
+            // $attachments = $card->attachments()->get();
+            $attachments = $card->attachments()->with('comments.user', 'user')->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Card details retrieved successfully.',
                 'card' => new CardResource($card),
-                'comments' => $comments
+                'comments' => $comments,
+                'attachments' => $attachments,
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
@@ -623,6 +626,6 @@ class CardController extends Controller
             ], HttpResponse::HTTP_NOT_FOUND);
         }
     }
-
+    
     // Implement update, show, and delete methods similar to store method above...
 }

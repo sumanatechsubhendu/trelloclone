@@ -12,6 +12,7 @@ use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceMemberController;
+use App\Http\Controllers\AttachmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,11 @@ Route::middleware('auth:api')->group( function () {
     Route::get('/workspaceMembers/nonMembers', [WorkspaceMemberController::class, 'getNonWorkspaceMembers']);
     Route::post('/cards/{card}/members', [CardController::class, 'addMember']);
     Route::get('/cards/{cardId}/non-members', [CardController::class, 'getNonCardMembers']);
+    Route::resource('attachments', AttachmentController::class);
+    Route::post('/{cardId}/attachments', [AttachmentController::class, 'store']);
+    Route::post('attachments/{attachmentId}/comments', [AttachmentController::class, 'storeComment']);
+    Route::patch('attachments/{attachmentId}/comments/{commentId}', [AttachmentController::class, 'updateComment']);
+    Route::delete('attachments/{attachmentId}/comments/{commentId}', [AttachmentController::class, 'destroyComment']);
 
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
