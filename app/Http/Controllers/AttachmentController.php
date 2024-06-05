@@ -15,13 +15,108 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 
+/**
+ * @OA\Schema(
+ *     schema="Attachment",
+ *     @OA\Property(
+ *         property="id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the board"
+ *     ),
+ *     @OA\Property(
+ *         property="attachable_id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the entity this attachment is associated with"
+ *     ),
+ *     @OA\Property(
+ *         property="attachable_name",
+ *         type="string",
+ *         description="The original name of the attachment file"
+ *     ),
+ *     @OA\Property(
+ *         property="attachable_type",
+ *         type="string",
+ *         description="The type of the entity this attachment is associated with"
+ *     ),
+ *     @OA\Property(
+ *         property="attachment_path",
+ *         type="string",
+ *         description="The file path where the attachment is stored"
+ *     ),
+ *     @OA\Property(
+ *         property="file_type",
+ *         type="string",
+ *         description="The file type/extension of the attachment"
+ *     ),
+ *     @OA\Property(
+ *         property="user_id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the user who uploaded the attachment"
+ *     ),
+ *     @OA\Property(
+ *         property="created_at",
+ *         type="string",
+ *         format="date-time",
+ *         description="The date and time when the board was created"
+ *     ),
+ *     @OA\Property(
+ *         property="updated_at",
+ *         type="string",
+ *         format="date-time",
+ *         description="The date and time when the board was updated"
+ *     ),
+ * )
+ * 
+ *  * @OA\Schema(
+ *     schema="Attachment_Comment",
+ *     @OA\Property(
+ *         property="id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the board"
+ *     ),
+ *     @OA\Property(
+ *         property="attachment_id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the attachment this comment is associated with"
+ *     ),
+ *     @OA\Property(
+ *         property="user_id",
+ *         type="integer",
+ *         format="int64",
+ *         description="The ID of the user who uploaded the comment"
+ *     ),
+ *     @OA\Property(
+ *         property="comment",
+ *         type="string",
+ *         description="The text content of the comment"
+ *     ),
+ *     @OA\Property(
+ *         property="created_at",
+ *         type="string",
+ *         format="date-time",
+ *         description="The date and time when the board was created"
+ *     ),
+ *     @OA\Property(
+ *         property="updated_at",
+ *         type="string",
+ *         format="date-time",
+ *         description="The date and time when the board was updated"
+ *     ),
+ * )
+ */
+
 class AttachmentController extends Controller
 {
 
     /**
      * Store a newly created attachment in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreAttachmentRequest  $request
      * @param  int  $cardId
      * @return \Illuminate\Http\Response
      *
@@ -57,17 +152,7 @@ class AttachmentController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Attachment uploaded successfully."),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="attachable_id", type="integer", example=1),
-     *                 @OA\Property(property="attachable_name", type="string", example="example.jpg"),
-     *                 @OA\Property(property="attachable_type", type="string", example="App\Models\Card"),
-     *                 @OA\Property(property="attachment_path", type="string", example="attachments/example.jpg"),
-     *                 @OA\Property(property="file_type", type="string", example="jpg"),
-     *                 @OA\Property(property="user_id", type="integer", example=1),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-06-01T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-06-01T12:00:00Z")
-     *             )
+     *             @OA\Property(property="data", ref="#/components/schemas/Attachment")
      *         )
      *     ),
      *     @OA\Response(
@@ -126,7 +211,7 @@ class AttachmentController extends Controller
     /**
      * Update the name of an attachment.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateAttachmentNameRequest  $request
      * @param  int  $attachmentId
      * @return \Illuminate\Http\Response
      *
@@ -145,11 +230,7 @@ class AttachmentController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"attachable_name"},
-     *             @OA\Property(
-     *                 property="attachable_name",
-     *                 description="The new name for the attachment",
-     *                 type="string"
-     *             )
+     *             @OA\Property(property="attachable_name", type="string")
      *         )
      *     ),
      *     @OA\Response(
@@ -158,12 +239,7 @@ class AttachmentController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Attachment name updated successfully."),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="attachable_name", type="string", example="New Attachment Name"),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-06-01T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-06-02T12:00:00Z")
-     *             )
+     *             @OA\Property(property="data", ref="#/components/schemas/Attachment")
      *         )
      *     ),
      *     @OA\Response(
@@ -201,7 +277,7 @@ class AttachmentController extends Controller
     }
 
     /**
-     * Delete an attachment from storage.
+     * Remove the specified attachment from storage.
      *
      * @param  int  $attachmentId
      * @return \Illuminate\Http\Response
@@ -291,14 +367,7 @@ class AttachmentController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Comment added successfully."),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="attachment_id", type="integer", example=1),
-     *                 @OA\Property(property="user_id", type="integer", example=1),
-     *                 @OA\Property(property="comment", type="string", example="This is a comment."),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-06-01T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-06-01T12:00:00Z")
-     *             )
+     *              @OA\Property(property="data", ref="#/components/schemas/Attachment_Comment")
      *         )
      *     ),
      *     @OA\Response(
@@ -395,14 +464,7 @@ class AttachmentController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Comment updated successfully."),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="attachment_id", type="integer", example=1),
-     *                 @OA\Property(property="user_id", type="integer", example=1),
-     *                 @OA\Property(property="comment", type="string", example="This is an updated comment."),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-06-01T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-06-02T12:00:00Z")
-     *             )
+     *              @OA\Property(property="data", ref="#/components/schemas/Attachment_Comment")
      *         )
      *     ),
      *     @OA\Response(
