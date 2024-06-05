@@ -7,6 +7,8 @@ use App\Models\Attachment;
 use App\Models\AttachmentComment;
 use App\Http\Requests\StoreAttachmentRequest;
 use App\Http\Requests\UpdateAttachmentNameRequest;
+use App\Http\Requests\StoreAttachmentCommentRequest;
+use App\Http\Requests\UpdateAttachmentCommentRequest;
 use App\Http\Resources\AttachmentResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -198,7 +200,7 @@ class AttachmentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Attachment uploaded successfully.',
-                'data' => new AttachmentResource($attachmentRecord),
+                'data' => $attachmentRecord,
             ], HttpResponse::HTTP_CREATED);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
@@ -391,7 +393,7 @@ class AttachmentController extends Controller
      * )
      */
 
-    public function storeComment(Request $request, $attachmentId)
+    public function storeComment(StoreAttachmentCommentRequest $request, $attachmentId)
     {
         $request->validate([
             'comment' => 'required|string'
@@ -487,7 +489,7 @@ class AttachmentController extends Controller
      *     security={{"bearerAuth": {}}}
      * )
      */
-    public function updateComment(Request $request, $attachmentId, $commentId)
+    public function updateComment(UpdateAttachmentCommentRequest $request, $attachmentId, $commentId)
     {
         $request->validate([
             'comment' => 'required|string'

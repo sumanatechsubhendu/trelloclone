@@ -20,9 +20,10 @@ class AttachmentResource extends JsonResource
             'attachable_id' => $this->attachable_id,
             'attachable_name' => $this->attachable_name,
             'attachable_type' => $this->attachable_type,
-            'attachment_path' => $this->attachment_path,
+            'attachment_path' => asset('storage/' . $this->attachment_path), 
             'file_type' => $this->file_type,
             'user_id' => $this->user_id,
+            'user' => new UserResource($this->user), 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

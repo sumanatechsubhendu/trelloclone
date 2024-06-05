@@ -16,6 +16,7 @@ use App\Models\CardMember;
 use App\Models\WorkspaceMember;
 use App\Http\Resources\CardResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\AttachmentResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -217,7 +218,7 @@ class CardController extends Controller
                 'message' => 'Card details retrieved successfully.',
                 'card' => new CardResource($card),
                 'comments' => $comments,
-                'attachments' => $attachments,
+                'attachments' => AttachmentResource::collection($attachments),
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
