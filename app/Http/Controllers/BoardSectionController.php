@@ -373,4 +373,71 @@ class BoardSectionController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to delete board section.'], 500);
         }
     }
+
+     /**
+     * Get sections by board ID.
+     *
+     * @param  int  $board_id
+     * @return \Illuminate\Http\Response
+     */
+    /**
+     * @OA\Get(
+     *     path="/api/boards/{board_id}/sections",
+     *     summary="Get sections by board ID",
+     *     tags={"Sections"},
+     *     description="Retrieves sections associated with a specific board ID",
+     *     operationId="getSectionsByBoard",
+     *     @OA\Parameter(
+     *         name="board_id",
+     *         in="path",
+     *         description="ID of the board to fetch sections for",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int32",
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of sections for the specified board",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Section"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Board not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Board not found")
+     *         )
+     *     ),
+     *     security={{"bearerAuth": {}}}
+     * )
+     */
+    
+    public function getSectionsByBoard($board_id)
+    {
+        // Fetch sections associated with the board
+        $boardSections = BoardSection::where('board_id', $board_id)->get();
+
+        if ($boardSections->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Board not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Transform the result into SectionResource collection
+        $sections = $boardSections->map(function ($boardSection) {
+            return new BoardSectionResource($boardSection->section);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sections retrieved successfully',
+            'data' => $sections
+        ], JsonResponse::HTTP_OK);
+    }
 }
