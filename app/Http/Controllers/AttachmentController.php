@@ -182,7 +182,7 @@ class AttachmentController extends Controller
         try {
             $card = Card::findOrFail($cardId);
             $attachment = $request->file('attachment');
-            $path = $attachment->store('attachments');
+            $path = $attachment->store('attachments', 'public');
             $fileType = $attachment->getClientOriginalExtension();
             $originalFileName = $attachment->getClientOriginalName();
 
