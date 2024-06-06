@@ -45,6 +45,7 @@ Route::middleware('auth:api')->group( function () {
     Route::get('/workspaceMembers/nonMembers', [WorkspaceMemberController::class, 'getNonWorkspaceMembers']);
     Route::post('/cards/{card}/members', [CardController::class, 'addMember']);
     Route::get('/cards/{cardId}/non-members', [CardController::class, 'getNonCardMembers']);
+    Route::get('boards/{board_id}/sections', [BoardSectionController::class, 'getSectionsByBoard']);
 
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
