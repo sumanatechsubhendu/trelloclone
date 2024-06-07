@@ -14,11 +14,13 @@ use App\Models\Comment;
 use App\Models\User;
 use App\Models\CardMember;
 use App\Models\WorkspaceMember;
+use App\Models\BoardSection;
 use App\Http\Resources\CardResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 /**
@@ -621,6 +623,224 @@ class CardController extends Controller
                 'success' => false,
                 'message' => "No non-members found for this workspace.",
             ], HttpResponse::HTTP_NOT_FOUND);
+        }
+    }
+
+        /**
+     * @OA\Put(
+     *     path="/api/cards/{id}/move",
+     *     summary="Move a card to a different board section and update its position",
+     *     tags={"Cards"},
+     *     description="Updates the board_id, section_id, and position_id of a specified card.",
+     *     operationId="moveCard",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the card to move",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"board_id", "section_id", "position_id"},
+     *             @OA\Property(property="board_id", type="integer", example=1),
+     *             @OA\Property(property="section_id", type="integer", example=2),
+     *             @OA\Property(property="position_id", type="integer", example=5)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Card moved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Card moved successfully"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Card")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Card not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Card not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object", example={"board_id": {"The board_id field is required."}, "section_id": {"The section_id field is required."}, "position_id": {"The position_id field is required."}})
+     *         )
+     *     )
+     * )
+     */
+    public function moveCard(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'board_id' => 'required|integer|exists:boards,id',
+            'section_id' => 'required|integer|exists:sections,id',
+            'position_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        try {
+
+            $card = Card::findOrFail($id);
+
+            $boardSection = BoardSection::where('board_id', $request->input('board_id'))
+                ->where('section_id', $request->input('section_id'))
+                ->firstOrFail();
+
+            // Fetch all the cards for the specified board_section_id
+            $cards = Card::where('board_section_id', $boardSection->id)->orderBy('position_id')->get();
+
+            // Update the position of existing cards if necessary
+            foreach ($cards as $existingCard) {
+                if ($existingCard->position_id >= $request->input('position_id')) {
+                    $existingCard->position_id++;
+                    $existingCard->save();
+                }
+            }
+
+            $card->board_section_id = $boardSection->id;
+            $card->position_id = $request->input('position_id');
+            $card->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Card moved successfully',
+                'data' => $card
+            ], JsonResponse::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Card or BoardSection not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/cards/{id}/copy",
+     *     summary="Copy a card",
+     *     tags={"Cards"},
+     *     description="Creates a new card by copying an existing card and placing it in the specified board section and position.",
+     *     operationId="copyCard",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the card to copy",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"board_id", "section_id", "position_id"},
+     *             @OA\Property(property="board_id", type="integer", example=1),
+     *             @OA\Property(property="section_id", type="integer", example=2),
+     *             @OA\Property(property="position_id", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Card copied successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Card copied successfully"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Card")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Card or BoardSection not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Card or BoardSection not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object", example={"board_id": {"The board_id field is required."}, "section_id": {"The section_id field is required."}, "position_id": {"The position_id field is required."}})
+     *         )
+     *     )
+     * )
+     */
+    public function copyCard(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'board_id' => 'required|integer|exists:boards,id',
+            'section_id' => 'required|integer|exists:sections,id',
+            'position_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        try {
+            // Find the card to copy
+            $card = Card::findOrFail($id);
+
+            // Find the BoardSection record
+            $boardSection = BoardSection::where('board_id', $request->input('board_id'))
+                ->where('section_id', $request->input('section_id'))
+                ->firstOrFail();
+
+            // Fetch all the cards for the specified board_section_id, ordered by position_id
+            $cards = Card::where('board_section_id', $boardSection->id)
+                ->orderBy('position_id')
+                ->get();
+
+            // Update the position of existing cards if the target position is already occupied
+            foreach ($cards as $existingCard) {
+                if ($existingCard->position_id >= $request->input('position_id')) {
+                    $existingCard->position_id++;
+                    $existingCard->save();
+                }
+            }
+
+            // Create a new card with the same attributes
+            $newCard = Card::create([
+                'title' => $card->title,
+                'description' => $card->description,
+                'board_section_id' => $boardSection->id,
+                'position_id' => $request->input('position_id'),
+                'created_by' => Auth::user()->id,
+            ]);
+
+            // Optionally, handle copying other related data like comments, members, etc.
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Card copied successfully',
+                'data' => new CardResource($newCard)
+            ], JsonResponse::HTTP_CREATED);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Card or BoardSection not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
         }
     }
 
