@@ -194,21 +194,21 @@ class WorkspaceController extends Controller
             'message' => 'Workspace created successfully.',
             'data' => new WorkspaceResource($workspaceObj)
         ], JsonResponse::HTTP_OK);
-     }
+    }
 
-     /**
+    /**
      * @OA\Get(
-     *     path="/api/workspaces/{id}",
-     *     operationId="getWorkspaceById",
+     *     path="/api/workspaces/{slug}",
+     *     operationId="getWorkspaceBySlug",
      *     tags={"Workspaces"},
-     *     summary="Get workspace details by ID",
-     *     description="Returns the details of a workspace identified by the provided ID",
+     *     summary="Get workspace details by slug",
+     *     description="Returns the details of a workspace identified by the provided slug",
      *     @OA\Parameter(
-     *         name="id",
+     *         name="slug",
      *         in="path",
-     *         description="ID of the workspace to fetch",
+     *         description="Slug of the workspace to fetch",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -227,38 +227,48 @@ class WorkspaceController extends Controller
      * )
      */
 
-     public function show($id)
+     public function show($slug)
      {
-        $user = Auth::user();
-
-        // If the user is an admin, retrieve all workspaces
-        if ($user->role == 'admin') {
-            try {
-                $workspaces = Workspace::findOrFail($id);
-            } catch (ModelNotFoundException $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Workspace not found'
-                ], JsonResponse::HTTP_NOT_FOUND);
-            }
-        } else {
-            $workspaceIds = WorkspaceMember::where('user_id', $user->id)
-            ->where("workspace_id", $id)->pluck('workspace_id')->all();
-            if (empty($workspaceIds)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No workspace found or there is no access.'
-                ], 404);
-            }
-
-            // Retrieve workspaces for the user
-            $workspaces = Workspace::whereIn('id', $workspaceIds)->first();
-        }
-        return response()->json([
-            'success' => true,
-            'message' => 'Workspace details retrieved successfully.',
-            'data' => new WorkspaceResourceWithBoards($workspaces)
-        ]);
+         $user = Auth::user();
+ 
+         // If the user is an admin, retrieve the workspace by slug
+         if ($user->role == 'admin') {
+             try {
+                 $workspace = Workspace::where('slug', $slug)->firstOrFail();
+             } catch (ModelNotFoundException $e) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'Workspace not found'
+                 ], JsonResponse::HTTP_NOT_FOUND);
+             }
+         } else {
+             // Get workspace ID by slug
+             $workspace = Workspace::where('slug', $slug)->first();
+             if (!$workspace) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'Workspace not found'
+                 ], JsonResponse::HTTP_NOT_FOUND);
+             }
+ 
+             // Check if the user is a member of the workspace
+             $isMember = WorkspaceMember::where('user_id', $user->id)
+                 ->where('workspace_id', $workspace->id)
+                 ->exists();
+ 
+             if (!$isMember) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'No access to this workspace.'
+                 ], JsonResponse::HTTP_FORBIDDEN);
+             }
+         }
+         
+         return response()->json([
+             'success' => true,
+             'message' => 'Workspace details retrieved successfully.',
+             'data' => new WorkspaceResourceWithBoards($workspace)
+         ]);
      }
 
      /**

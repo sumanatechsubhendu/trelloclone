@@ -61,6 +61,6 @@ Route::middleware('auth:api')->group( function () {
         Route::resource('cards', CardController::class);
     });
     Route::get('workspaces', [WorkspaceController::class, 'index']);
-    Route::get('workspaces/{workspaces}', [WorkspaceController::class, 'show']);
+    Route::get('workspaces/{slug}', [WorkspaceController::class, 'show']);
     Route::post('/users/{user}/profile-image', [ImageController::class, 'storeProfileImage']);
 });

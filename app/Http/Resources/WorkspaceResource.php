@@ -18,6 +18,7 @@ class WorkspaceResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'bg_color' => $this->bg_color,
+            'slug' => $this->slug,
             'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
