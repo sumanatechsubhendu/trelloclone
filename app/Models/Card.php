@@ -30,5 +30,10 @@ class Card extends Model
         return $this->belongsToMany(WorkspaceMember::class, 'card_members', 'card_id', 'workspace_member_id');
     }
 
+    public function attachments()
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
+    }
+
     // Define relationships if any
 }
