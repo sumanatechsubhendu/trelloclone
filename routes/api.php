@@ -45,6 +45,9 @@ Route::middleware('auth:api')->group( function () {
     Route::get('/workspaceMembers/nonMembers', [WorkspaceMemberController::class, 'getNonWorkspaceMembers']);
     Route::post('/cards/{card}/members', [CardController::class, 'addMember']);
     Route::get('/cards/{cardId}/non-members', [CardController::class, 'getNonCardMembers']);
+    Route::get('sections/{id}/positions', [SectionController::class, 'getPositionListBySectionId']);
+    Route::put('cards/{id}/move', [CardController::class, 'moveCard']);
+    Route::post('cards/{id}/copy', [CardController::class, 'copyCard']);
     Route::get('boards/{board_id}/sections', [BoardSectionController::class, 'getSectionsByBoard']);
 
     Route::middleware(['admin'])->group(function () {

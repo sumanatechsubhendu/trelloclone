@@ -6,6 +6,7 @@ use App\Http\Requests\SectionRequest;
 use App\Http\Resources\SectionResource;
 use Illuminate\Http\Request;
 use App\Models\Section;
+use App\Models\Card;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -358,5 +359,71 @@ class SectionController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to delete Section.'], 500);
         }
         
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/sections/{id}/positions",
+     *     operationId="getSectionPositionsById",
+     *     tags={"Sections"},
+     *     summary="Get positions of a section by ID",
+     *     description="Returns the positions of a section identified by the provided ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the section to fetch positions for",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Section positions retrieved successfully."),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Section not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Section not found")
+     *         )
+     *     ),
+     *     security={{"bearerAuth": {}}}
+     * )
+     */
+    public function getPositionListBySectionId($id)
+    {
+        try {
+            // Check if the section exists
+            $section = Section::findOrFail($id);
+
+            // Fetch the position values for all sections
+            $positions = Card::where('board_section_id', $id)
+            ->orderBy('position_id', 'asc')
+            ->pluck('position_id');
+
+            // Check if positions are empty
+            if ($positions->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No positions found for the given section ID.',
+                ], JsonResponse::HTTP_NO_CONTENT);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Section positions retrieved successfully.',
+                'data' => $positions
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Section not found'
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
     }
 }
