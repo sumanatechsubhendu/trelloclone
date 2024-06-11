@@ -48,6 +48,7 @@ Route::middleware('auth:api')->group( function () {
     Route::get('sections/{id}/positions', [SectionController::class, 'getPositionListBySectionId']);
     Route::put('cards/{id}/move', [CardController::class, 'moveCard']);
     Route::post('cards/{id}/copy', [CardController::class, 'copyCard']);
+    Route::get('boards/{board_id}/sections', [BoardSectionController::class, 'getSectionsByBoard']);
 
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);
