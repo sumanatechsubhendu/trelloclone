@@ -51,6 +51,7 @@ Route::middleware('auth:api')->group( function () {
     Route::post('attachments/{attachmentId}/comments', [AttachmentController::class, 'storeComment']);
     Route::patch('attachments/{attachmentId}/comments/{commentId}', [AttachmentController::class, 'updateComment']);
     Route::delete('attachments/{attachmentId}/comments/{commentId}', [AttachmentController::class, 'destroyComment']);
+    Route::get('boards/{board_id}/sections', [BoardSectionController::class, 'getSectionsByBoard']);
 
     Route::middleware(['admin'])->group(function () {
         Route::resource('users', UserController::class);

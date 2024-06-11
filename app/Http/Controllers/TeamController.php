@@ -310,7 +310,11 @@ class TeamController extends Controller
       */
      public function destroy(Team $team)
      {
-         $team->delete();
-         return response()->json(null, 204);
+        try {
+            $team->delete();
+            return response()->json(['success' => true, 'message' => 'Team deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete team.'], 500);
+        }
      }
 }
